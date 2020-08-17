@@ -105,7 +105,15 @@ def bitUnpacker(byte):
     if byte&128 != 0: bits.append(1)
     else: bits.append(0)
     return bits
-
+########DELETE
+def btINT(bits):
+    btINT = 0
+    if bits[0] == 1:
+        btINT += 1
+    if bits[1] == 1:
+        btINT += 2
+    return btINT
+########DELETE
 def bfINT(bits):
     #Four bit (1/0 array) to Int
     bfINT = 0
@@ -119,23 +127,73 @@ def bfINT(bits):
         bfINT += 8
     return bfINT
 
+def bINT(bits):
+    bINT = 0
+    for i in range(len(bits)):
+        if i == 0:
+            if bits[i] == 1:
+                bINT += 1
+        if i == 1:
+            if bits[i] == 1:
+                bINT += 2
+        if i == 2:
+            if bits[i] == 1:
+                bINT += 4
+        if i == 3:
+            if bits[i] == 1:
+                bINT += 8
+        if i == 4:
+            if bits[i] == 1:
+                bINT += 16
+        if i == 5:
+            if bits[i] == 1:
+                bINT += 32
+        if i == 6:
+            if bits[i] == 1:
+                bINT += 64
+        if i == 7:
+            if bits[i] == 1:
+                bINT += 128
+    return bINT
+
 def CMF(bits):
-    CM = []
-    CINFO = []
+    CMa = []
+    CINFOa = []
     for i in range(len(bits)):
         #print(bits[i])
         #print(i)
         if i < 4:
-            CM.append(bits[i])
+            CMa.append(bits[i])
         elif i < 8:
-            CINFO.append(bits[i])
-    print(bits)
-    print(CM)
-    print(CINFO)
-    print(bfINT(CM))
-    print(bfINT(CINFO))
+            CINFOa.append(bits[i])
+    CM = bINT(CMa)
+    CINFO = bINT(CINFOa)
+    return CM,CINFO
+
+def FLG(bits):
+    FCHECKa = []
+    FDICTa = []
+    FLEVELa = []
+    for i in range(len(bits)):
+        if i < 5:
+            FCHECKa.append(bits[i])
+        elif i < 6:
+            FDICTa.append(bits[i])
+        elif i < 8:
+            FLEVELa.append(bits[i])
+    FCHECK = bINT(FCHECKa)
+    FDICT = bINT(FDICTa)
+    FLEVEL = bINT(FLEVELa)
+    return FCHECK,FDICT,FLEVEL
 
 def ZLIB(imageData):
+    CM,CINFO = CMF(bitUnpacker(imageData[0]))
+    FCHECK,FDICT,FLEVEL = FLG(bitUnpacker(imageData[1]))
+    print(CM)
+    print(CINFO)
+    print(FCHECK)
+    print(FDICT)
+    print(FLEVEL)
     #bits = bitUnpacker(imageData[0])
     #return CMF(bits)
 
@@ -179,14 +237,7 @@ with open(image,"rb") as file:
     print('pixelsPerUnitX',pixelsPerUnitX)
     print('pixelsPerUnitY',pixelsPerUnitY)
     print('unitSpecifier',unitSpecifier)
-    #print('imageData',imageData)
-    #for i in imageData:
-    #    print(i)
-    #print(imageData[0])
-    #print(imageData[1])
-    #print(bitUnpacker(imageData[0]))
-    x = bitUnpacker(imageData[0])
-    CMF(x)
+    ZLIB(imageData)
     file.close()
 
 #4 byte unsigned int gives number of bytes in chunk's data field. Must not exceed 2^31
