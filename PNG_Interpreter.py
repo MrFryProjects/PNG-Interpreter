@@ -1,7 +1,7 @@
 
 #Logan
 #Pillow, SciPy, Tikinter, S-Lang
-
+#image = "C:\\Users\\Code\\Desktop\\7qrh3donqsd51.png"
 image = "C:\\Users\\Code\\Desktop\\Untitled.png"
 
 width = ''
@@ -189,11 +189,13 @@ def FLG(bits):
 def ZLIB(imageData):
     CM,CINFO = CMF(bitUnpacker(imageData[0]))
     FCHECK,FDICT,FLEVEL = FLG(bitUnpacker(imageData[1]))
-    print(CM)
-    print(CINFO)
-    print(FCHECK)
-    print(FDICT)
-    print(FLEVEL)
+    F_CHECK = (imageData[0]*256+imageData[1])%31==0
+    print('F_CHECK',F_CHECK)
+    print("CM",CM)
+    print('CINFO',CINFO)
+    print('FCHECK',FCHECK)
+    print('FDICT',FDICT)
+    print('FLEVEL',FLEVEL)
     #bits = bitUnpacker(imageData[0])
     #return CMF(bits)
 
