@@ -1,7 +1,8 @@
-
 #Logan
 #Pillow, SciPy, Tikinter, S-Lang
 #image = "C:\\Users\\Code\\Desktop\\7qrh3donqsd51.png"
+import zlib
+
 image = "C:\\Users\\Code\\Desktop\\Untitled.png"
 
 width = ''
@@ -68,6 +69,7 @@ def IEND(chunkData):
 def chunkRead(file):
     dataLen = int.from_bytes(file.read(4),byteorder='big')
     chunkRead.chunkType = file.read(1)+file.read(1)+file.read(1)+file.read(1)
+    print(chunkRead.chunkType)
     chunkRead.chunkData = file.read(dataLen)
     chunkRead.chunkCRC = int.from_bytes(file.read(4),byteorder='big')
 
@@ -85,6 +87,7 @@ def chunkDiscriminator(chunkType,chunkData):
     if chunkType == b'IEND':
         IEND(chunkData)
 
+# To be used in building zlib data stream decoder
 def bitUnpacker(byte):
     #reverse order
     bits = []
@@ -105,28 +108,8 @@ def bitUnpacker(byte):
     if byte&128 != 0: bits.append(1)
     else: bits.append(0)
     return bits
-########DELETE
-def btINT(bits):
-    btINT = 0
-    if bits[0] == 1:
-        btINT += 1
-    if bits[1] == 1:
-        btINT += 2
-    return btINT
-########DELETE
-def bfINT(bits):
-    #Four bit (1/0 array) to Int
-    bfINT = 0
-    if bits[0] == 1:
-        bfINT += 1
-    if bits[1] == 1:
-        bfINT += 2
-    if bits[2] == 1:
-        bfINT += 4
-    if bits[3] == 1:
-        bfINT += 8
-    return bfINT
 
+# To be used in building zlib data stream decoder
 def bINT(bits):
     bINT = 0
     for i in range(len(bits)):
@@ -156,12 +139,11 @@ def bINT(bits):
                 bINT += 128
     return bINT
 
+# To be used in building zlib data stream decoder
 def CMF(bits):
     CMa = []
     CINFOa = []
     for i in range(len(bits)):
-        #print(bits[i])
-        #print(i)
         if i < 4:
             CMa.append(bits[i])
         elif i < 8:
@@ -170,6 +152,7 @@ def CMF(bits):
     CINFO = bINT(CINFOa)
     return CM,CINFO
 
+# To be used in building zlib data stream decoder
 def FLG(bits):
     FCHECKa = []
     FDICTa = []
@@ -186,6 +169,7 @@ def FLG(bits):
     FLEVEL = bINT(FLEVELa)
     return FCHECK,FDICT,FLEVEL
 
+# To be used in building zlib data stream decoder
 def ZLIB(imageData):
     CM,CINFO = CMF(bitUnpacker(imageData[0]))
     FCHECK,FDICT,FLEVEL = FLG(bitUnpacker(imageData[1]))
@@ -196,20 +180,12 @@ def ZLIB(imageData):
     print('FCHECK',FCHECK)
     print('FDICT',FDICT)
     print('FLEVEL',FLEVEL)
-    #bits = bitUnpacker(imageData[0])
-    #return CMF(bits)
-
-    return True
-    #https://tools.ietf.org/html/rfc1950
-    #byte 1 bit 0|3 CM compression method
-    #byte 1 bit 4|7 CINFO compression info
-    #byte 2 bit 0|4 FCHECK
-    #byte 2 bit 5 FDICT
-    #byte 2 bit 6|7 FLG
-    #6 byte ADLER32 checksum at end
 
 def chunkCRCverify(chunkData,chunkCRC):
     return True
+
+#https://tools.ietf.org/html/rfc1950
+#https://zlib.net/feldspar.html
 
 with open(image,"rb") as file:
     readingFile = True
@@ -239,8 +215,10 @@ with open(image,"rb") as file:
     print('pixelsPerUnitX',pixelsPerUnitX)
     print('pixelsPerUnitY',pixelsPerUnitY)
     print('unitSpecifier',unitSpecifier)
-    ZLIB(imageData)
+    print(zlib.decompress(imageData))
     file.close()
+
+# for interpreting the zlib datastream, consider PNG filtering types
 
 #4 byte unsigned int gives number of bytes in chunk's data field. Must not exceed 2^31
 #4 byte chunk type code.
